@@ -12,9 +12,11 @@ The repository is organized as follows:
   - `star_schema.sql`: Script to create and populate the Star Schema database.
   - `data_vault.sql`: Script to create and populate the Data Vault database.
   
-- *EER Diagrams*: Visual representations of the data models.
-  - `Star_Schema_Diagram.png`: Entity-Relationship Diagram for the Star Schema model.
-  - `Data_Vault_Diagram.png`: Entity-Relationship Diagram for the Data Vault model.
+- *Diagrams*
+  - **Star Schema Diagram**: Provides a visual overview of the Star Schema model, showing the fact and dimension tables and their relationships.
+  - **Data Vault Diagram**: Displays the Data Vault model, including hubs, links, and satellites, and their connections.
+
+You can find these diagrams in the [Diagrams](Diagrams/) folder.
 
 - *README.md*: This file, providing an overview of the project, setup instructions, and additional resources.
 
