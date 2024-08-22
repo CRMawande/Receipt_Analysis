@@ -24,7 +24,7 @@ To set up this project locally, follow these steps:
 
 1. *Clone the Repository*:
    ```bash
-   [git clone https://github.com/CharmaineMawande/receipt-analysis.git](https://github.com/CRMawande/Receipt_Analysis.git)
+   git clone https://github.com/CRMawande/Receipt_Analysis.git
 
 2. *Set Up MySQL Database*:
 
