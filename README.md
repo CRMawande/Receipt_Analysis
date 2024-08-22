@@ -24,28 +24,31 @@ You can find these diagrams in the [Diagrams](Diagrams/) folder.
 
 For reference, the image of the receipt used in this analysis is available in the `Receipts` folder:
 
-![Receipt Image](Receipts/receipt_image.png)
+![Receipt Image](Receipts/)
 
 This receipt was used to generate the data for both the Star Schema and Data Vault models.
 
 - *README.md*: This file, providing an overview of the project, setup instructions, and additional resources.
 
-## Installation
+## Setup Guide
 
-To set up this project locally, follow these steps:
+1. *Install MySQL*
 
-1. *Clone the Repository*:
+If you don't have MySQL installed on your system, you can download and install it from the official MySQL website:
+
+- **Download MySQL**: [MySQL Community Downloads](https://dev.mysql.com/downloads/mysql/)
+
+Follow the installation instructions provided on the website for your operating system.
+
+2. *Clone the Repository*:
    ```bash
    git clone https://github.com/CRMawande/Receipt_Analysis.git
 
-2. *Set Up MySQL Database*:
+3. *Set Up MySQL Database*:
 
 Import the star_schema.sql and data_vault.sql files into your MySQL database.
 Use tools like MySQL Workbench for easier management and visualization.
 
-3. *Generate Diagrams*:
-
-You can use MySQL Workbench's reverse engineering feature to generate and view the EER diagrams based on the SQL scripts provided.
 
 ## Usage
 After setting up the databases, you can execute queries to perform various analyses on the receipt data, such as:
