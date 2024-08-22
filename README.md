@@ -20,6 +20,14 @@ You can find these SQL scripts in the [SQL_Scripts](SQL_Scripts/) folder.
 
 You can find these diagrams in the [Diagrams](Diagrams/) folder.
 
+- *Receipt Image*
+
+For reference, the image of the receipt used in this analysis is available in the `Receipts` folder:
+
+![Receipt Image](Receipts/receipt_image.png)
+
+This receipt was used to generate the data for both the Star Schema and Data Vault models.
+
 - *README.md*: This file, providing an overview of the project, setup instructions, and additional resources.
 
 ## Installation
