@@ -38,9 +38,11 @@ You can use MySQL Workbench's reverse engineering feature to generate and view t
 ## Usage
 After setting up the databases, you can execute queries to perform various analyses on the receipt data, such as:
 
-Sales Performance: Calculate total sales, discounts given, and VAT for each product.
-Smart Shopper Points Analysis: Determine the percentage of points earned based on the amount spent.
-Contributing
++ Sales Performance: Calculate total sales, discounts given, and VAT for each product.
+
++ Smart Shopper Points Analysis: Determine the percentage of points earned based on the amount spent.
+  
+## Contributing
 Contributions are welcome! Please fork the repository and submit a pull request if you have any improvements or additional features to add.
 
 ## License
