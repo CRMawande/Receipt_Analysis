@@ -50,4 +50,5 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 For any questions or suggestions, please feel free to reach out:
 
 Name: Charmaine Mawande
+
 Email: [charmaine.mawande@iu-study.org] 
