@@ -11,6 +11,8 @@ The repository is organized as follows:
 - *SQL Scripts*: Contains all the SQL scripts used to create and populate the databases for both the Star Schema and Data Vault models.
   - `star_schema.sql`: Script to create and populate the Star Schema database.
   - `data_vault.sql`: Script to create and populate the Data Vault database.
+ 
+You can find these SQL scripts in the [SQL_Scripts](SQL_Scripts/) folder.
   
 - *Diagrams*
   - **Star Schema Diagram**: Provides a visual overview of the Star Schema model, showing the fact and dimension tables and their relationships.
