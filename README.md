@@ -22,9 +22,9 @@ You can find these diagrams in the [Diagrams](Diagrams/) folder.
 
 - *Receipt Image*
 
-For reference, the image of the receipt used in this analysis is available in the `Receipts` folder:
+For reference, the image of the receipt used in this analysis is available in the [Receipts](Receipts/) folder:
 
-![Receipt Image](Receipts/)
+
 
 This receipt was used to generate the data for both the Star Schema and Data Vault models.
 
