@@ -49,13 +49,6 @@ Follow the installation instructions provided on the website for your operating 
 Import the star_schema.sql and data_vault.sql files into your MySQL database.
 Use tools like MySQL Workbench for easier management and visualization.
 
-
-## Usage
-After setting up the databases, you can execute queries to perform various analyses on the receipt data, such as:
-
-+ Sales Performance: Calculate total sales, discounts given, and VAT for each product.
-
-+ Smart Shopper Points Analysis: Determine the percentage of points earned based on the amount spent.
   
 ## Contributing
 Contributions are welcome! Please fork the repository and submit a pull request if you have any improvements or additional features to add.
