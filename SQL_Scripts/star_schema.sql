@@ -1,10 +1,10 @@
 -- ==================================================
--- Database Setup for Simplified Star Schema
+-- Database Setup for Star Schema
 -- ==================================================
 
 -- Create the Star Schema Database
-CREATE DATABASE StarSchema_Receipt_Simplified;
-USE StarSchema_Receipt_Simplified;
+CREATE DATABASE StarSchema_Receipt;
+USE StarSchema_Receipt;
 
 -- ==================================================
 -- Dimension Tables
