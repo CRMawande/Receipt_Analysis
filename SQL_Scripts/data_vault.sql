@@ -1,360 +1,208 @@
-CREATE DATABASE  IF NOT EXISTS `datavault_receipt` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `datavault_receipt`;
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
---
--- Host: 127.0.0.1    Database: datavault_receipt
--- ------------------------------------------------------
--- Server version	8.0.39
+-- ==================================================
+-- Database Setup for Data Vault
+-- ==================================================
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+-- Create the Data Vault Database
+CREATE DATABASE DataVault_Receipt;
+USE DataVault_Receipt;
 
---
--- Table structure for table `cashierhub`
---
+-- ==================================================
+-- Hubs
+-- ==================================================
 
-DROP TABLE IF EXISTS `cashierhub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `cashierhub` (
-  `CashierID` int NOT NULL AUTO_INCREMENT,
-  `CashierKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`CashierID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Hub_Product: Stores unique product identifiers
+CREATE TABLE Hub_Product (
+    ProductKey INT AUTO_INCREMENT PRIMARY KEY,
+    ProductID VARCHAR(255) NOT NULL, -- Natural Key (e.g., Product Name)
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255)
+);
 
---
--- Table structure for table `cashiersat`
---
+-- Hub_Time: Stores unique time identifiers
+CREATE TABLE Hub_Time (
+    TimeKey INT AUTO_INCREMENT PRIMARY KEY,
+    DateID DATE NOT NULL, -- Natural Key (e.g., YYYY-MM-DD)
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255)
+);
 
-DROP TABLE IF EXISTS `cashiersat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `cashiersat` (
-  `CashierID` int NOT NULL,
-  `CashierName` varchar(255) NOT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`CashierID`,`LoadDate`),
-  CONSTRAINT `cashiersat_ibfk_1` FOREIGN KEY (`CashierID`) REFERENCES `cashierhub` (`CashierID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Hub_Location: Stores unique location identifiers
+CREATE TABLE Hub_Location (
+    LocationKey INT AUTO_INCREMENT PRIMARY KEY,
+    StoreName VARCHAR(255) NOT NULL, -- Natural Key (e.g., Store Name)
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255)
+);
 
---
--- Table structure for table `discounthub`
---
+-- ==================================================
+-- Links
+-- ==================================================
 
-DROP TABLE IF EXISTS `discounthub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `discounthub` (
-  `DiscountID` int NOT NULL AUTO_INCREMENT,
-  `DiscountKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`DiscountID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Link_ReceiptPosition: Connects the product, time, and location Hubs with the transactional fact
+CREATE TABLE Link_ReceiptPosition (
+    ReceiptPositionKey INT AUTO_INCREMENT PRIMARY KEY,
+    ProductKey INT NOT NULL,
+    TimeKey INT NOT NULL,
+    LocationKey INT NOT NULL,
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255),
+    FOREIGN KEY (ProductKey) REFERENCES Hub_Product(ProductKey),
+    FOREIGN KEY (TimeKey) REFERENCES Hub_Time(TimeKey),
+    FOREIGN KEY (LocationKey) REFERENCES Hub_Location(LocationKey)
+);
 
---
--- Temporary view structure for view `discountimpact`
---
+-- ==================================================
+-- Satellites
+-- ==================================================
 
-DROP TABLE IF EXISTS `discountimpact`;
-/*!50001 DROP VIEW IF EXISTS `discountimpact`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `discountimpact` AS SELECT 
- 1 AS `DiscountDescription`,
- 1 AS `TotalTransactions`*/;
-SET character_set_client = @saved_cs_client;
+-- Sat_Product: Stores descriptive attributes for products
+CREATE TABLE Sat_Product (
+    ProductKey INT NOT NULL,
+    ProductName VARCHAR(255),
+    ProductType VARCHAR(255),
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255),
+    FOREIGN KEY (ProductKey) REFERENCES Hub_Product(ProductKey)
+);
 
---
--- Table structure for table `discountsat`
---
+-- Sat_Time: Stores descriptive attributes for time
+CREATE TABLE Sat_Time (
+    TimeKey INT NOT NULL,
+    Timestamp DATETIME,
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255),
+    FOREIGN KEY (TimeKey) REFERENCES Hub_Time(TimeKey)
+);
 
-DROP TABLE IF EXISTS `discountsat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `discountsat` (
-  `DiscountID` int NOT NULL,
-  `DiscountDescription` varchar(255) NOT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`DiscountID`,`LoadDate`),
-  CONSTRAINT `discountsat_ibfk_1` FOREIGN KEY (`DiscountID`) REFERENCES `discounthub` (`DiscountID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Sat_Location: Stores descriptive attributes for location
+CREATE TABLE Sat_Location (
+    LocationKey INT NOT NULL,
+    StorePhoneNumber VARCHAR(20),
+    StoreWebsite VARCHAR(255),
+    CustomerCareLine VARCHAR(20),
+    StoreVATNumber VARCHAR(20),
+    LoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    RecordSource VARCHAR(255),
+    FOREIGN KEY (LocationKey) REFERENCES Hub_Location(LocationKey)
+);
 
---
--- Table structure for table `locationhub`
---
+-- ==================================================
+-- Inserting Data
+-- ==================================================
 
-DROP TABLE IF EXISTS `locationhub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `locationhub` (
-  `LocationID` int NOT NULL AUTO_INCREMENT,
-  `LocationKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`LocationID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Insert into Hub_Product
+INSERT INTO Hub_Product (ProductID, RecordSource) VALUES
+('A/SUPER W/W BRWN BRD LOW GI', 'Receipt Data'),
+('FULL CREAM MILK 2L', 'Receipt Data'),
+('NO NAME CHOCCHIP BISCUITS 50', 'Receipt Data'),
+('WEET-BIX 900g', 'Receipt Data'),
+('COCA-COLA PLASTIC 2L', 'Receipt Data'),
+('BLK C/CLASSIC B WORS', 'Receipt Data'),
+('SHOULDER BACON 200GR', 'Receipt Data'),
+('BACK BACON RINDLESS 200g', 'Receipt Data'),
+('REG F/S AROMA INDULGENC500ml', 'Receipt Data'),
+('PNP F/C TEEN TITANS YOG 6EA', 'Receipt Data'),
+('BRICK 500g', 'Receipt Data'),
+('R/ON BLACK&WHITE POWER 50ml', 'Receipt Data'),
+('CARRIER BAG 24L', 'Receipt Data');
 
---
--- Table structure for table `locationsat`
---
+-- Insert into Hub_Time
+INSERT INTO Hub_Time (DateID, RecordSource) VALUES
+('2024-06-01', 'Receipt Data');
 
-DROP TABLE IF EXISTS `locationsat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `locationsat` (
-  `LocationID` int NOT NULL,
-  `StoreName` varchar(255) NOT NULL,
-  `StorePhoneNumber` varchar(20) DEFAULT NULL,
-  `StoreWebsite` varchar(255) DEFAULT NULL,
-  `CustomerCareLine` varchar(20) DEFAULT NULL,
-  `StoreVATNumber` varchar(20) DEFAULT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`LocationID`,`LoadDate`),
-  CONSTRAINT `locationsat_ibfk_1` FOREIGN KEY (`LocationID`) REFERENCES `locationhub` (`LocationID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Insert into Hub_Location
+INSERT INTO Hub_Location (StoreName, RecordSource) VALUES
+('PnP QualiSave Nkomo Mall', 'Receipt Data');
 
---
--- Table structure for table `paymenthub`
---
+-- Insert into Link_ReceiptPosition
+INSERT INTO Link_ReceiptPosition (ProductKey, TimeKey, LocationKey, RecordSource) VALUES
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'A/SUPER W/W BRWN BRD LOW GI'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'FULL CREAM MILK 2L'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'NO NAME CHOCCHIP BISCUITS 50'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'WEET-BIX 900g'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'COCA-COLA PLASTIC 2L'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BLK C/CLASSIC B WORS'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'SHOULDER BACON 200GR'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BACK BACON RINDLESS 200g'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'REG F/S AROMA INDULGENC500ml'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'PNP F/C TEEN TITANS YOG 6EA'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BRICK 500g'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'R/ON BLACK&WHITE POWER 50ml'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'CARRIER BAG 24L'),
+ (SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'),
+ (SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ 'Receipt Data');
 
-DROP TABLE IF EXISTS `paymenthub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `paymenthub` (
-  `PaymentID` int NOT NULL AUTO_INCREMENT,
-  `PaymentKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`PaymentID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Insert into Sat_Product
+INSERT INTO Sat_Product (ProductKey, ProductName, ProductType, RecordSource) VALUES
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'A/SUPER W/W BRWN BRD LOW GI'),
+ 'A/SUPER W/W BRWN BRD LOW GI', 'Bread', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'FULL CREAM MILK 2L'),
+ 'FULL CREAM MILK 2L', 'Dairy', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'NO NAME CHOCCHIP BISCUITS 50'),
+ 'NO NAME CHOCCHIP BISCUITS 50', 'Snacks', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'WEET-BIX 900g'),
+ 'WEET-BIX 900g', 'Cereal', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'COCA-COLA PLASTIC 2L'),
+ 'COCA-COLA PLASTIC 2L', 'Beverage', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BLK C/CLASSIC B WORS'),
+ 'BLK C/CLASSIC B WORS', 'Meat', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'SHOULDER BACON 200GR'),
+ 'SHOULDER BACON 200GR', 'Meat', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BACK BACON RINDLESS 200g'),
+ 'BACK BACON RINDLESS 200g', 'Meat', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'REG F/S AROMA INDULGENC500ml'),
+ 'REG F/S AROMA INDULGENC500ml', 'Beverage', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'PNP F/C TEEN TITANS YOG 6EA'),
+ 'PNP F/C TEEN TITANS YOG 6EA', 'Dairy', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'BRICK 500g'),
+ 'BRICK 500g', 'Bread', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'R/ON BLACK&WHITE POWER 50ml'),
+ 'R/ON BLACK&WHITE POWER 50ml', 'Health & Beauty', 'Receipt Data'),
+((SELECT ProductKey FROM Hub_Product WHERE ProductID = 'CARRIER BAG 24L'),
+ 'CARRIER BAG 24L', 'Packaging', 'Receipt Data');
 
---
--- Table structure for table `paymentsat`
---
+-- Insert into Sat_Time
+INSERT INTO Sat_Time (TimeKey, Timestamp, RecordSource) VALUES
+((SELECT TimeKey FROM Hub_Time WHERE DateID = '2024-06-01'), '2024-06-01 12:00:00', 'Receipt Data');
 
-DROP TABLE IF EXISTS `paymentsat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `paymentsat` (
-  `PaymentID` int NOT NULL,
-  `PaymentType` varchar(255) NOT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`PaymentID`,`LoadDate`),
-  CONSTRAINT `paymentsat_ibfk_1` FOREIGN KEY (`PaymentID`) REFERENCES `paymenthub` (`PaymentID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `producthub`
---
-
-DROP TABLE IF EXISTS `producthub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `producthub` (
-  `ProductID` int NOT NULL AUTO_INCREMENT,
-  `ProductKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`ProductID`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Temporary view structure for view `productsalessummary`
---
-
-DROP TABLE IF EXISTS `productsalessummary`;
-/*!50001 DROP VIEW IF EXISTS `productsalessummary`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `productsalessummary` AS SELECT 
- 1 AS `ProductName`,
- 1 AS `ProductType`,
- 1 AS `TotalTransactions`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Table structure for table `productsat`
---
-
-DROP TABLE IF EXISTS `productsat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `productsat` (
-  `ProductID` int NOT NULL,
-  `ProductName` varchar(255) NOT NULL,
-  `ProductType` varchar(255) NOT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`ProductID`,`LoadDate`),
-  CONSTRAINT `productsat_ibfk_1` FOREIGN KEY (`ProductID`) REFERENCES `producthub` (`ProductID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `saleslink`
---
-
-DROP TABLE IF EXISTS `saleslink`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `saleslink` (
-  `SalesID` int NOT NULL AUTO_INCREMENT,
-  `DateID` int NOT NULL,
-  `ProductID` int NOT NULL,
-  `CashierID` int NOT NULL,
-  `PaymentID` int NOT NULL,
-  `LocationID` int NOT NULL,
-  `DiscountID` int DEFAULT NULL,
-  `SmartShopperID` int DEFAULT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`SalesID`),
-  KEY `ProductID` (`ProductID`),
-  KEY `CashierID` (`CashierID`),
-  KEY `PaymentID` (`PaymentID`),
-  KEY `LocationID` (`LocationID`),
-  KEY `DiscountID` (`DiscountID`),
-  KEY `SmartShopperID` (`SmartShopperID`),
-  CONSTRAINT `saleslink_ibfk_1` FOREIGN KEY (`ProductID`) REFERENCES `producthub` (`ProductID`),
-  CONSTRAINT `saleslink_ibfk_2` FOREIGN KEY (`CashierID`) REFERENCES `cashierhub` (`CashierID`),
-  CONSTRAINT `saleslink_ibfk_3` FOREIGN KEY (`PaymentID`) REFERENCES `paymenthub` (`PaymentID`),
-  CONSTRAINT `saleslink_ibfk_4` FOREIGN KEY (`LocationID`) REFERENCES `locationhub` (`LocationID`),
-  CONSTRAINT `saleslink_ibfk_5` FOREIGN KEY (`DiscountID`) REFERENCES `discounthub` (`DiscountID`),
-  CONSTRAINT `saleslink_ibfk_6` FOREIGN KEY (`SmartShopperID`) REFERENCES `smartshopperhub` (`SmartShopperID`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `smartshopperhub`
---
-
-DROP TABLE IF EXISTS `smartshopperhub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `smartshopperhub` (
-  `SmartShopperID` int NOT NULL AUTO_INCREMENT,
-  `SmartShopperKey` varchar(255) NOT NULL,
-  `LoadDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`SmartShopperID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Temporary view structure for view `smartshopperpointssummary`
---
-
-DROP TABLE IF EXISTS `smartshopperpointssummary`;
-/*!50001 DROP VIEW IF EXISTS `smartshopperpointssummary`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `smartshopperpointssummary` AS SELECT 
- 1 AS `CardNumber`,
- 1 AS `TotalTransactions`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Table structure for table `smartshoppersat`
---
-
-DROP TABLE IF EXISTS `smartshoppersat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `smartshoppersat` (
-  `SmartShopperID` int NOT NULL,
-  `CardNumber` varchar(20) NOT NULL,
-  `LoadDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `RecordSource` varchar(255) NOT NULL,
-  PRIMARY KEY (`SmartShopperID`,`LoadDate`),
-  CONSTRAINT `smartshoppersat_ibfk_1` FOREIGN KEY (`SmartShopperID`) REFERENCES `smartshopperhub` (`SmartShopperID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Final view structure for view `discountimpact`
---
-
-/*!50001 DROP VIEW IF EXISTS `discountimpact`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `discountimpact` AS select `ds`.`DiscountDescription` AS `DiscountDescription`,count(`sl`.`SalesID`) AS `TotalTransactions` from (`saleslink` `sl` join `discountsat` `ds` on((`sl`.`DiscountID` = `ds`.`DiscountID`))) group by `ds`.`DiscountDescription` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `productsalessummary`
---
-
-/*!50001 DROP VIEW IF EXISTS `productsalessummary`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `productsalessummary` AS select `ps`.`ProductName` AS `ProductName`,`ps`.`ProductType` AS `ProductType`,count(`sl`.`SalesID`) AS `TotalTransactions` from (`saleslink` `sl` join `productsat` `ps` on((`sl`.`ProductID` = `ps`.`ProductID`))) group by `ps`.`ProductName`,`ps`.`ProductType` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `smartshopperpointssummary`
---
-
-/*!50001 DROP VIEW IF EXISTS `smartshopperpointssummary`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `smartshopperpointssummary` AS select `ss`.`CardNumber` AS `CardNumber`,count(`sl`.`SalesID`) AS `TotalTransactions` from (`saleslink` `sl` join `smartshoppersat` `ss` on((`sl`.`SmartShopperID` = `ss`.`SmartShopperID`))) group by `ss`.`CardNumber` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2024-08-22 20:27:59
+-- Insert into Sat_Location
+INSERT INTO Sat_Location (LocationKey, StorePhoneNumber, StoreWebsite, CustomerCareLine, StoreVATNumber, RecordSource) VALUES
+((SELECT LocationKey FROM Hub_Location WHERE StoreName = 'PnP QualiSave Nkomo Mall'),
+ '012 003 2849', 'www.picknpay.co.za', '0860 30 30 30', '4090105588', 'Receipt Data');
