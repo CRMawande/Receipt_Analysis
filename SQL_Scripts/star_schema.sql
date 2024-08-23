@@ -1,353 +1,161 @@
-CREATE DATABASE  IF NOT EXISTS `starschema_receipt` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `starschema_receipt`;
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
---
--- Host: 127.0.0.1    Database: starschema_receipt
--- ------------------------------------------------------
--- Server version	8.0.39
+-- ==================================================
+-- Database Setup for Simplified Star Schema
+-- ==================================================
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+-- Create the Star Schema Database
+CREATE DATABASE StarSchema_Receipt_Simplified;
+USE StarSchema_Receipt_Simplified;
 
---
--- Table structure for table `cashierdimension`
---
+-- ==================================================
+-- Dimension Tables
+-- ==================================================
 
-DROP TABLE IF EXISTS `cashierdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `cashierdimension` (
-  `CashierID` int NOT NULL AUTO_INCREMENT,
-  `CashierName` varchar(255) NOT NULL,
-  PRIMARY KEY (`CashierID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Time Dimension Table
+CREATE TABLE TimeDimension (
+    TimeID INT AUTO_INCREMENT PRIMARY KEY,
+    Timestamp DATETIME NOT NULL
+);
 
---
--- Dumping data for table `cashierdimension`
---
+-- Product Dimension Table
+CREATE TABLE ProductDimension (
+    ProductID INT AUTO_INCREMENT PRIMARY KEY,
+    ProductName VARCHAR(255) NOT NULL,
+    ProductType VARCHAR(255) NOT NULL
+);
 
-LOCK TABLES `cashierdimension` WRITE;
-/*!40000 ALTER TABLE `cashierdimension` DISABLE KEYS */;
-INSERT INTO `cashierdimension` VALUES (1,'Bridget Masakela');
-/*!40000 ALTER TABLE `cashierdimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Location Dimension Table
+CREATE TABLE LocationDimension (
+    LocationID INT AUTO_INCREMENT PRIMARY KEY,
+    StoreName VARCHAR(255) NOT NULL,
+    StorePhoneNumber VARCHAR(20),
+    StoreWebsite VARCHAR(255),
+    CustomerCareLine VARCHAR(20),
+    StoreVATNumber VARCHAR(20)
+);
 
---
--- Table structure for table `datedimension`
---
+-- ==================================================
+-- Fact Table
+-- ==================================================
 
-DROP TABLE IF EXISTS `datedimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `datedimension` (
-  `DateID` int NOT NULL AUTO_INCREMENT,
-  `Timestamp` datetime NOT NULL,
-  PRIMARY KEY (`DateID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE ReceiptPositionFact (
+    ReceiptPositionID INT AUTO_INCREMENT PRIMARY KEY,
+    TimeID INT NOT NULL,
+    ProductID INT NOT NULL,
+    LocationID INT NOT NULL,
+    Quantity INT NOT NULL,
+    UnitPricePaidZAR DECIMAL(10, 2) NOT NULL,
+    TotalPriceZAR DECIMAL(10, 2) NOT NULL,
+    PricePaidZAR DECIMAL(10, 2) NOT NULL,
+    PointsEarnedZAR DECIMAL(10, 2) NOT NULL,
+    VATAmountZAR DECIMAL(10, 2) NOT NULL,
+    DiscountAmountZAR DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (TimeID) REFERENCES TimeDimension(TimeID),
+    FOREIGN KEY (ProductID) REFERENCES ProductDimension(ProductID),
+    FOREIGN KEY (LocationID) REFERENCES LocationDimension(LocationID)
+);
 
---
--- Dumping data for table `datedimension`
---
+-- ==================================================
+-- Inserting Data into Dimension Tables
+-- ==================================================
 
-LOCK TABLES `datedimension` WRITE;
-/*!40000 ALTER TABLE `datedimension` DISABLE KEYS */;
-INSERT INTO `datedimension` VALUES (1,'2024-06-01 12:00:00');
-/*!40000 ALTER TABLE `datedimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Insert Time Data
+INSERT INTO TimeDimension (Timestamp) VALUES
+('2024-06-01 12:00:00');
 
---
--- Table structure for table `discountdimension`
---
+-- Insert Product Data
+INSERT INTO ProductDimension (ProductName, ProductType) VALUES
+('A/SUPER W/W BRWN BRD LOW GI', 'Bread'),
+('FULL CREAM MILK 2L', 'Dairy'),
+('NO NAME CHOCCHIP BISCUITS 50', 'Snacks'),
+('WEET-BIX 900g', 'Cereal'),
+('COCA-COLA PLASTIC 2L', 'Beverage'),
+('BLK C/CLASSIC B WORS', 'Meat'),
+('SHOULDER BACON 200GR', 'Meat'),
+('BACK BACON RINDLESS 200g', 'Meat'),
+('REG F/S AROMA INDULGENC500ml', 'Beverage'),
+('PNP F/C TEEN TITANS YOG 6EA', 'Dairy'),
+('BRICK 500g', 'Butter'),
+('R/ON BLACK&WHITE POWER 50ml', 'Personal Care'),
+('CARRIER BAG 24L', 'Packaging');
 
-DROP TABLE IF EXISTS `discountdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `discountdimension` (
-  `DiscountID` int NOT NULL AUTO_INCREMENT,
-  `DiscountDescription` varchar(255) NOT NULL,
-  PRIMARY KEY (`DiscountID`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Insert Location Data
+INSERT INTO LocationDimension (StoreName, StorePhoneNumber, StoreWebsite, CustomerCareLine, StoreVATNumber) VALUES
+('PnP QualiSave Nkomo Mall', '012 003 2849', 'www.picknpay.co.za', '0860 30 30 30', '4090105588');
 
---
--- Dumping data for table `discountdimension`
---
+-- ==================================================
+-- Inserting Data into the Fact Table
+-- ==================================================
 
-LOCK TABLES `discountdimension` WRITE;
-/*!40000 ALTER TABLE `discountdimension` DISABLE KEYS */;
-INSERT INTO `discountdimension` VALUES (1,'BRICK 500g cash-off'),(2,'R/ON BLACK&WHITE POWER cash-off');
-/*!40000 ALTER TABLE `discountdimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Adjusted Variables
+SET @timeID = 1; -- Adjust as needed
+SET @locationID = (SELECT LocationID FROM LocationDimension WHERE StoreName = 'PnP QualiSave Nkomo Mall');
 
---
--- Table structure for table `locationdimension`
---
+-- BRICK 500g
+SET @discountAmountBRICK = 20.98;
+SET @totalPriceBRICK = 65.98;
+SET @pricePaidBRICK = @totalPriceBRICK - @discountAmountBRICK;
+SET @pointsEarnedBRICK = (@pricePaidBRICK / 2) / 100;
+SET @vatAmountBRICK = (@pricePaidBRICK * 0.15)/1.15;
+SET @unitPricePaidBRICK = @pricePaidBRICK / 2;
 
-DROP TABLE IF EXISTS `locationdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `locationdimension` (
-  `LocationID` int NOT NULL AUTO_INCREMENT,
-  `StoreName` varchar(255) NOT NULL,
-  `StorePhoneNumber` varchar(20) DEFAULT NULL,
-  `StoreWebsite` varchar(255) DEFAULT NULL,
-  `CustomerCareLine` varchar(20) DEFAULT NULL,
-  `StoreVATNumber` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`LocationID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- R/ON BLACK&WHITE POWER 50ml
+SET @discountAmountR_ON = 8.00;
+SET @totalPriceR_ON = 34.99;
+SET @pricePaidR_ON = @totalPriceR_ON - @discountAmountR_ON;
+SET @pointsEarnedR_ON = (@pricePaidR_ON / 2) / 100;
+SET @vatAmountR_ON = (@pricePaidR_ON * 0.15)/1.15;
+SET @unitPricePaidR_ON = @pricePaidR_ON / 1;
 
---
--- Dumping data for table `locationdimension`
---
+-- Full Insert Statements for ReceiptPositionFact
+INSERT INTO ReceiptPositionFact (TimeID, ProductID, LocationID, Quantity, UnitPricePaidZAR, TotalPriceZAR, PricePaidZAR, PointsEarnedZAR, VATAmountZAR, DiscountAmountZAR) VALUES
+-- Product: A/SUPER W/W BRWN BRD LOW GI
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'A/SUPER W/W BRWN BRD LOW GI'), 
+ @locationID, 1, 23.99, 23.99, 23.99, (23.99 / 2) / 100, 0.00, 0.00),
 
-LOCK TABLES `locationdimension` WRITE;
-/*!40000 ALTER TABLE `locationdimension` DISABLE KEYS */;
-INSERT INTO `locationdimension` VALUES (1,'PnP QualiSave Nkomo Mall','012 003 2849','www.picknpay.co.za','0860 30 30 30','4090105588');
-/*!40000 ALTER TABLE `locationdimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Product: FULL CREAM MILK 2L
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'FULL CREAM MILK 2L'), 
+ @locationID, 1, 29.99, 29.99, 29.99, (29.99 / 2) / 100, 0.00, 0.00),
 
---
--- Table structure for table `paymentdimension`
---
+-- Product: NO NAME CHOCCHIP BISCUITS 50
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'NO NAME CHOCCHIP BISCUITS 50'), 
+ @locationID, 1, 29.99, 29.99, 29.99, (29.99 / 2) / 100, (29.99 * 0.15)/1.15, 0.00),
 
-DROP TABLE IF EXISTS `paymentdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `paymentdimension` (
-  `PaymentID` int NOT NULL AUTO_INCREMENT,
-  `PaymentType` varchar(255) NOT NULL,
-  PRIMARY KEY (`PaymentID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Product: WEET-BIX 900g
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'WEET-BIX 900g'), 
+ @locationID, 2, 52.99, 105.98, 105.98, (105.98 / 2) / 100, (105.98 * 0.15)/1.15, 0.00),
 
---
--- Dumping data for table `paymentdimension`
---
+-- Product: COCA-COLA PLASTIC 2L
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'COCA-COLA PLASTIC 2L'), 
+ @locationID, 1, 21.99, 21.99, 21.99, (21.99 / 2) / 100, (21.99 * 0.15)/1.15, 0.00),
 
-LOCK TABLES `paymentdimension` WRITE;
-/*!40000 ALTER TABLE `paymentdimension` DISABLE KEYS */;
-INSERT INTO `paymentdimension` VALUES (1,'Visa Card');
-/*!40000 ALTER TABLE `paymentdimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Product: BLK C/CLASSIC B WORS
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'BLK C/CLASSIC B WORS'), 
+ @locationID, 1, 142.11, 142.11, 142.11, (142.11 / 2) / 100, (142.11 * 0.15)/1.15, 0.00),
 
---
--- Temporary view structure for view `performancesummary`
---
+-- Product: SHOULDER BACON 200GR
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'SHOULDER BACON 200GR'), 
+ @locationID, 1, 25.99, 25.99, 25.99, (25.99 / 2) / 100, (25.99 * 0.15)/1.15, 0.00),
 
-DROP TABLE IF EXISTS `performancesummary`;
-/*!50001 DROP VIEW IF EXISTS `performancesummary`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `performancesummary` AS SELECT 
- 1 AS `TotalSalesAmountZAR`,
- 1 AS `TotalDiscountGivenZAR`,
- 1 AS `TotalPointsEarnedZAR`*/;
-SET character_set_client = @saved_cs_client;
+-- Product: BACK BACON RINDLESS 200g
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'BACK BACON RINDLESS 200g'), 
+ @locationID, 1, 47.99, 47.99, 47.99, (47.99 / 2) / 100, (47.99 * 0.15)/1.15, 0.00),
 
---
--- Table structure for table `productdimension`
---
+-- Product: REG F/S AROMA INDULGENC500ml
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'REG F/S AROMA INDULGENC500ml'), 
+ @locationID, 1, 27.99, 27.99, 27.99, (27.99 / 2) / 100, (27.99 * 0.15)/1.15, 0.00),
 
-DROP TABLE IF EXISTS `productdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `productdimension` (
-  `ProductID` int NOT NULL AUTO_INCREMENT,
-  `ProductName` varchar(255) NOT NULL,
-  `ProductType` varchar(255) NOT NULL,
-  PRIMARY KEY (`ProductID`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+-- Product: PNP F/C TEEN TITANS YOG 6EA
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'PNP F/C TEEN TITANS YOG 6EA'), 
+ @locationID, 1, 21.99, 21.99, 21.99, (21.99 / 2) / 100, (21.99 * 0.15)/1.15, 0.00),
 
---
--- Dumping data for table `productdimension`
---
+-- Product: BRICK 500g
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'BRICK 500g'), 
+ @locationID, 2, @unitPricePaidBRICK, @totalPriceBRICK, @pricePaidBRICK, @pointsEarnedBRICK, @vatAmountBRICK, @discountAmountBRICK),
 
-LOCK TABLES `productdimension` WRITE;
-/*!40000 ALTER TABLE `productdimension` DISABLE KEYS */;
-INSERT INTO `productdimension` VALUES (1,'A/SUPER W/W BRWN BRD LOW GI','Bread'),(2,'FULL CREAM MILK 2L','Dairy'),(3,'NO NAME CHOCCHIP BISCUITS 50','Snacks'),(4,'WEET-BIX 900g','Cereal'),(5,'COCA-COLA PLASTIC 2L','Beverage'),(6,'BLK C/CLASSIC B WORS','Meat'),(7,'SHOULDER BACON 200GR','Meat'),(8,'BACK BACON RINDLESS 200g','Meat'),(9,'REG F/S AROMA INDULGENC500ml','Beverage'),(10,'PNP F/C TEEN TITANS YOG 6EA','Dairy'),(11,'BRICK 500g','Butter'),(12,'R/ON BLACK&WHITE POWER 50ml','Personal Care'),(13,'CARRIER BAG 24L','Packaging');
-/*!40000 ALTER TABLE `productdimension` ENABLE KEYS */;
-UNLOCK TABLES;
+-- Product: R/ON BLACK&WHITE POWER 50ml
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'R/ON BLACK&WHITE POWER 50ml'), 
+ @locationID, 1, @unitPricePaidR_ON, @totalPriceR_ON, @pricePaidR_ON, @pointsEarnedR_ON, @vatAmountR_ON, @discountAmountR_ON),
 
---
--- Table structure for table `salesfact`
---
-
-DROP TABLE IF EXISTS `salesfact`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `salesfact` (
-  `SalesID` int NOT NULL AUTO_INCREMENT,
-  `DateID` int NOT NULL,
-  `ProductID` int NOT NULL,
-  `CashierID` int NOT NULL,
-  `PaymentID` int NOT NULL,
-  `LocationID` int NOT NULL,
-  `DiscountID` int DEFAULT NULL,
-  `SmartShopperID` int DEFAULT NULL,
-  `Quantity` int NOT NULL,
-  `UnitPricePaidZAR` decimal(10,2) NOT NULL,
-  `TotalPriceZAR` decimal(10,2) NOT NULL,
-  `PricePaidZAR` decimal(10,2) NOT NULL,
-  `PointsEarnedZAR` decimal(10,2) NOT NULL,
-  `VATAmountZAR` decimal(10,2) NOT NULL,
-  `DiscountAmountZAR` decimal(10,2) NOT NULL,
-  PRIMARY KEY (`SalesID`),
-  KEY `DateID` (`DateID`),
-  KEY `ProductID` (`ProductID`),
-  KEY `CashierID` (`CashierID`),
-  KEY `PaymentID` (`PaymentID`),
-  KEY `LocationID` (`LocationID`),
-  KEY `DiscountID` (`DiscountID`),
-  KEY `SmartShopperID` (`SmartShopperID`),
-  CONSTRAINT `salesfact_ibfk_1` FOREIGN KEY (`DateID`) REFERENCES `datedimension` (`DateID`),
-  CONSTRAINT `salesfact_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `productdimension` (`ProductID`),
-  CONSTRAINT `salesfact_ibfk_3` FOREIGN KEY (`CashierID`) REFERENCES `cashierdimension` (`CashierID`),
-  CONSTRAINT `salesfact_ibfk_4` FOREIGN KEY (`PaymentID`) REFERENCES `paymentdimension` (`PaymentID`),
-  CONSTRAINT `salesfact_ibfk_5` FOREIGN KEY (`LocationID`) REFERENCES `locationdimension` (`LocationID`),
-  CONSTRAINT `salesfact_ibfk_6` FOREIGN KEY (`DiscountID`) REFERENCES `discountdimension` (`DiscountID`),
-  CONSTRAINT `salesfact_ibfk_7` FOREIGN KEY (`SmartShopperID`) REFERENCES `smartshopperdimension` (`SmartShopperID`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `salesfact`
---
-
-LOCK TABLES `salesfact` WRITE;
-/*!40000 ALTER TABLE `salesfact` DISABLE KEYS */;
-INSERT INTO `salesfact` VALUES (1,1,1,1,1,1,NULL,1,1,23.99,23.99,23.99,0.12,0.00,0.00),(2,1,2,1,1,1,NULL,1,1,29.99,29.99,29.99,0.15,0.00,0.00),(3,1,3,1,1,1,NULL,1,1,29.99,29.99,29.99,0.15,3.91,0.00),(4,1,4,1,1,1,NULL,1,2,52.99,105.98,105.98,0.53,13.82,0.00),(5,1,5,1,1,1,NULL,1,1,21.99,21.99,21.99,0.11,2.87,0.00),(6,1,6,1,1,1,NULL,1,1,142.11,142.11,142.11,0.71,18.54,0.00),(7,1,7,1,1,1,NULL,1,1,25.99,25.99,25.99,0.13,3.39,0.00),(8,1,8,1,1,1,NULL,1,1,47.99,47.99,47.99,0.24,6.26,0.00),(9,1,9,1,1,1,NULL,1,1,27.99,27.99,27.99,0.14,3.65,0.00),(10,1,10,1,1,1,NULL,1,1,21.99,21.99,21.99,0.11,2.87,0.00),(11,1,11,1,1,1,1,1,2,32.99,65.98,45.00,0.23,5.87,20.98),(12,1,12,1,1,1,2,1,1,34.99,34.99,26.99,0.13,3.52,8.00),(13,1,13,1,1,1,NULL,1,1,1.20,1.20,1.20,0.01,0.16,0.00);
-/*!40000 ALTER TABLE `salesfact` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `smartshopperdimension`
---
-
-DROP TABLE IF EXISTS `smartshopperdimension`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `smartshopperdimension` (
-  `SmartShopperID` int NOT NULL AUTO_INCREMENT,
-  `CardNumber` varchar(20) NOT NULL,
-  PRIMARY KEY (`SmartShopperID`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `smartshopperdimension`
---
-
-LOCK TABLES `smartshopperdimension` WRITE;
-/*!40000 ALTER TABLE `smartshopperdimension` DISABLE KEYS */;
-INSERT INTO `smartshopperdimension` VALUES (1,'************2067');
-/*!40000 ALTER TABLE `smartshopperdimension` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Temporary view structure for view `smartshopperpointsanalysis`
---
-
-DROP TABLE IF EXISTS `smartshopperpointsanalysis`;
-/*!50001 DROP VIEW IF EXISTS `smartshopperpointsanalysis`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `smartshopperpointsanalysis` AS SELECT 
- 1 AS `SmartShopperID`,
- 1 AS `TotalTransactions`,
- 1 AS `TotalSalesAmountZAR`,
- 1 AS `TotalPointsEarnedZAR`,
- 1 AS `PointsEarnedPercentage`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Temporary view structure for view `vatsummary`
---
-
-DROP TABLE IF EXISTS `vatsummary`;
-/*!50001 DROP VIEW IF EXISTS `vatsummary`*/;
-SET @saved_cs_client     = @@character_set_client;
-/*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `vatsummary` AS SELECT 
- 1 AS `ProductName`,
- 1 AS `TotalQuantitySold`,
- 1 AS `TotalSalesAmountZAR`,
- 1 AS `TotalVATCollectedZAR`,
- 1 AS `VATPercentageOfTotalSales`*/;
-SET character_set_client = @saved_cs_client;
-
---
--- Final view structure for view `performancesummary`
---
-
-/*!50001 DROP VIEW IF EXISTS `performancesummary`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `performancesummary` AS select sum(`sf`.`PricePaidZAR`) AS `TotalSalesAmountZAR`,sum(`sf`.`DiscountAmountZAR`) AS `TotalDiscountGivenZAR`,sum(`sf`.`PointsEarnedZAR`) AS `TotalPointsEarnedZAR` from `salesfact` `sf` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `smartshopperpointsanalysis`
---
-
-/*!50001 DROP VIEW IF EXISTS `smartshopperpointsanalysis`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `smartshopperpointsanalysis` AS select `s`.`SmartShopperID` AS `SmartShopperID`,count(`sf`.`SalesID`) AS `TotalTransactions`,sum(`sf`.`PricePaidZAR`) AS `TotalSalesAmountZAR`,sum(`sf`.`PointsEarnedZAR`) AS `TotalPointsEarnedZAR`,((sum(`sf`.`PointsEarnedZAR`) / sum(`sf`.`TotalPriceZAR`)) * 100) AS `PointsEarnedPercentage` from (`salesfact` `sf` join `smartshopperdimension` `s` on((`sf`.`SmartShopperID` = `s`.`SmartShopperID`))) group by `s`.`SmartShopperID` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-
---
--- Final view structure for view `vatsummary`
---
-
-/*!50001 DROP VIEW IF EXISTS `vatsummary`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `vatsummary` AS select `p`.`ProductName` AS `ProductName`,sum(`sf`.`Quantity`) AS `TotalQuantitySold`,sum(`sf`.`PricePaidZAR`) AS `TotalSalesAmountZAR`,sum(`sf`.`VATAmountZAR`) AS `TotalVATCollectedZAR`,((sum(`sf`.`VATAmountZAR`) / sum(`sf`.`TotalPriceZAR`)) * 100) AS `VATPercentageOfTotalSales` from (`salesfact` `sf` join `productdimension` `p` on((`sf`.`ProductID` = `p`.`ProductID`))) group by `p`.`ProductName` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2024-08-22 19:58:36
+-- Product: CARRIER BAG 24L
+(@timeID, (SELECT ProductID FROM ProductDimension WHERE ProductName = 'CARRIER BAG 24L'), 
+ @locationID, 1, 1.00, 1.00, 1.00, (1.00 / 2) / 100, (1.00 * 0.15)/1.15, 0.00);
